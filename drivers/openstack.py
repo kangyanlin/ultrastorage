@@ -1,19 +1,22 @@
-
 import commands
+import sys
+import openstack_backend.LibvirtDriver as virt
 
-class OSPDriver(object):
+class OSPDriver:
+
     def __init__(self, authuser, authpwd, authurl, tenant, region, uuid):
 
         self.authuser = authuser
         self.authpwd = authpwd
-        self.authurl= authurl
+        self.authurl = authurl
         self.tenant = tenant
         self.region = region
         self.uuid = uuid
 
+    @property
     def image_info_parser(self):
 
-        # Used for get object info from glance
+        "Used for getting object info from Glance"
 
         try:
             # TODO: use OpenStack RESTful API, instead of a CLI tool
@@ -46,12 +49,13 @@ class OSPDriver(object):
         except Exception as e:
             pass
 
+    @property
     def instance_info_parser(self):
 
-        # Used for get object info from glance
+        "Used for getting object info from Nova"
 
         try:
-            # Will be deprecated in next version
+            # TODO: use OpenStack RESTful API, instead of a CLI tool
             cmdrslt = commands.getstatusoutput(
                 "nova --os-username %s --os-password %s --os-auth-url %s \
                 --os-tenant-name %s --os-region-name %s --os-image-api-version 2 \
@@ -80,12 +84,13 @@ class OSPDriver(object):
         except Exception as e:
             pass
 
+    @property
     def volume_info_parser(self):
 
-        # Used for get object info from glance
+        "Used for getting object info from Cinder"
 
         try:
-            # Will be deprecated in next version
+            # TODO: use OpenStack RESTful API, instead of a CLI tool
             cmdrslt = commands.getstatusoutput(
                 "cinder --os-username %s --os-password %s --os-auth-url %s \
                 --os-tenant-name %s --os-region-name %s --os-image-api-version 2 \
@@ -114,3 +119,70 @@ class OSPDriver(object):
 
         except Exception as e:
             pass
+
+    @property
+    def uploadObject(self, name, file, container_format, disk_format, bootable, min_disk=1, min_ram=128):
+
+        "Used for uploading object into OpenStack Glance as an image."
+
+        self.name = name
+        self.file = file
+        self.container_format = container_format
+        self.disk_format = disk_format
+        self.bootable = bootable
+        self.min_disk = min_disk
+        self.min_ram = min_ram
+
+        if bootable:
+            try:
+                # TODO: backup bootable objects from Glance, Nova, and Cinder
+                cmdrslt = commands.getstatusoutput(
+                "glance --os-username %s --os-password %s --os-auth-url %s \
+                --os-tenant-name %s --os-region-name %s --os-image-api-version 2 \
+                image-create --name %s --file %s --container-format %s --disk-format %s --min-disk %d --min-ram %d"
+                % (self.authuser, self.authpwd, self.authurl, self.tenant, self.region, self.name, \
+                    self.file, self.container_format, self.disk_format, self.min_disk, self.min_ram))
+                retr = cmdrslt[0]
+                data = cmdrslt[1]
+                if retr != 0:
+                    sys.stderr.write(data)
+                    sys.exit(2)
+            except KeyboardInterrupt:
+                sys.exit(1)
+            except Exception as e:
+                pass
+        else:
+            try:
+                # TODO: backup unbootable objects from Cinder
+                pass
+            except Exception as e:
+                pass
+
+    @property
+    def downloadImage(self, file):
+
+        "Used for downloading Nova snapshots from OpenStack Glance."
+
+        self.file = file
+
+        try:
+            # TODO: use OpenStack CLI
+            cmdrslt = commands.getstatusoutput(
+                "glance --os-username %s --os-password %s --os-auth-url %s \
+                --os-tenant-name %s --os-region-name %s --os-image-api-version 2 \
+                image-download --file %s %s"
+                % (self.authuser, self.authpwd, self.authurl, self.tenant, self.region, self.file, self.uuid))
+            retr = cmdrslt[0]
+            data = cmdrslt[1]
+            if retr != 0:
+                sys.stderr.write(data)
+                sys.exit(2)
+        except KeyboardInterrupt:
+            sys.exit(1)
+
+    @property
+    def downloadVolume(self):
+
+        "Used for downloading Cinder volumes."
+
+        pass

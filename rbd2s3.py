@@ -2,18 +2,10 @@
 
 import os
 import sys
-# import glanceclient as gcli
-# import novaclinet as ncli
-# import cinderclient as ccli
-import commands
+
 import cPickle
 
-
-import drivers.openstack.OSPDriver as osp
-import drivers.s3compatible.S3Driver as s3
-import drivers.openstack_backend.Libvirt as virt
-
-def credential_handler(CREDENTIAL):
+def credentialHandler(CREDENTIAL):
     # In order to get the value of following keys:
     #     * OS_USERNAME;
     #     * OS_PASSWORD;
