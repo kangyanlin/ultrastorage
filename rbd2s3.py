@@ -9,9 +9,9 @@ import commands
 import cPickle
 
 
-import driver.openstack.OSPDriver as osp
-import driver.s3compatible.S3Driver as s3
-import driver.openstack_backend.Libvirt as virt
+import drivers.openstack.OSPDriver as osp
+import drivers.s3compatible.S3Driver as s3
+import drivers.openstack_backend.Libvirt as virt
 
 def credential_handler(CREDENTIAL):
     # In order to get the value of following keys:
