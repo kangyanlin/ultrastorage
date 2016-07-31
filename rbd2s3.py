@@ -36,8 +36,6 @@ def credential_handler(CREDENTIAL):
         raise ValueError("Non-existed credential file.")
 
 
-
-
 def records_parser(recordfile):
     pass
 
