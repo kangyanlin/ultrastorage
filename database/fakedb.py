@@ -2,35 +2,34 @@ import cPickle
 
 class FakeDB:
 
-    def __init__(self, action, args, record):
+    def __init__(self, action, record):
+
+        # 'action' shall be one of the following str:
+        #     * 'r'
+        #     * 'w'
+        #     * 's', which means searching something, and returning a result list
 
         self.action = action
-        self.args = args
         self.record = record
 
-    def backup(self):
-
-        # should have checked env before operations
-        pass
-
-    def restore(self):
-
-        # should have checked env before operations
-        pass
-
-    def records_parser(self):
-
-        pass
-
-    def record_handler(self):
+    def ioHandler(self, records = None):
 
         if not os.path.exists(self.record):
             with open(self.record, "w") as f:
                 cPickle.dump([], f)
-        with open(self.record) as f:
-            records_old = cPickle.load(f)
-        record_old = None
+        if self.action == "w":
+            with open(self.record, "w") as f:
+                cPickle.dump(records, f)
+            return
+        elif self.action == "r":
+            with open(self.record) as f:
+                records_old = cPickle.load(f)
+            return records_old
+        else:
+            raise ValueError("No such DB operation.")
 
+    def search(self, key):
 
-    def setup(self):
-        pass
+        # the 's3_credential' shall be a dict, which includes all the info we need when connecting to s3.
+
+        self.key = key
