@@ -1,3 +1,5 @@
+import os
+import sys
 import cPickle
 
 class FakeDB:
@@ -12,7 +14,10 @@ class FakeDB:
         self.action = action
         self.record = record
 
+    @classmethod
     def ioHandler(self, records = None):
+
+        self.records = records
 
         if not os.path.exists(self.record):
             with open(self.record, "w") as f:
@@ -20,16 +25,29 @@ class FakeDB:
         if self.action == "w":
             with open(self.record, "w") as f:
                 cPickle.dump(records, f)
-            return
+            return True
         elif self.action == "r":
             with open(self.record) as f:
                 records_old = cPickle.load(f)
             return records_old
+        elif self.action == "s":
+            # Nothing will happen in this method.
+            sys.stdout("If you want to search something, pls use FakeDB.search().")
         else:
             raise ValueError("No such DB operation.")
 
-    def search(self, key):
+    @classmethod
+    def search(self, args):
 
-        # the 's3_credential' shall be a dict, which includes all the info we need when connecting to s3.
+        """To search a list of dicts in records. Variable 'args' shall be a dict.
 
-        self.key = key
+        Example:
+            * args = [ "record_type": "glance", "uuid": "9982054f-037a-40f1-8b62-301bef17a7c1" ]
+        """
+
+        # TODO: Exception required here for non-existed {key: value} pair.
+        self.args = args
+
+        current_records = self.ioHandler("r", self.record)
+        result = [ i for i in current_records if for j in self.args ]
+        return result
